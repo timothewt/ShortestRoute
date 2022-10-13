@@ -10,7 +10,7 @@ def find_shortest_path_a_star(G, start_coords: Coordinates, end_coords: Coordina
     :param end_coords: Coordinate object, ending point
     :return: a Route object, the shortest on in the graph between the two points
     """
-    print("Looking fo the shortest path..")
+    print("Looking for the shortest path..")
     # Setup
 
     nodes = get_nodes(G)
@@ -52,7 +52,7 @@ def find_shortest_path_a_star(G, start_coords: Coordinates, end_coords: Coordina
 if __name__ == "__main__":
     ox.settings.use_cache = True
 
-    G = ox.load_graphml('data/sonora.graphml')
+    G = ox.load_graphml('./data/sonora.graphml')
 
     start = Coordinates(30.57860, -100.64240)
     end = Coordinates(30.57283, -100.62984)
