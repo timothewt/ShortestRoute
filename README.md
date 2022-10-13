@@ -4,7 +4,7 @@ library. <br/>
 It finds the shortest path considering the length and does not take into account one-way roads
 and speed limits for the moment.
 
-<img src="https://i.ibb.co/1R7qhWc/shortest-road-sonora.png">
+<img width="50%" src="https://i.ibb.co/BTcZdMk/shortest-road-sonora.png" alt="Shortest route example">
 
 ---
 ## How to use
