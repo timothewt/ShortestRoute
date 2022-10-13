@@ -3,6 +3,13 @@ from graph_elements import *
 
 
 def find_shortest_path_a_star(G, start_coords: Coordinates, end_coords: Coordinates):
+    """
+    Finds the shortest route between two points in the graph
+    :param G: OSMNX Graph
+    :param start_coords: Coordinate object, starting point
+    :param end_coords: Coordinate object, ending point
+    :return: a Route object, the shortest on in the graph between the two points
+    """
     print("Looking fo the shortest path..")
     # Setup
 
