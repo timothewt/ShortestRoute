@@ -1,16 +1,26 @@
+import networkx
 from utils import *
 from graph_elements import *
 
 
-def find_shortest_path_a_star(G, start_coords: Coordinates, end_coords: Coordinates):
+def find_shortest_path_a_star(start_coords: Coordinates, end_coords: Coordinates) -> (networkx.MultiDiGraph, Route):
     """
     Finds the shortest route between two points in the graph
-    :param G: OSMNX Graph
     :param start_coords: Coordinate object, starting point
     :param end_coords: Coordinate object, ending point
     :return: a Route object, the shortest on in the graph between the two points
     """
-    print("Looking for the shortest path..")
+
+    # Fetching the graph with OSMNX
+
+    print('Downloading graph data...')
+    G = ox.graph_from_bbox(min(start.lat, end.lat) - .01,
+                           max(start.lat, end.lat) + .01,
+                           max(start.lon, end.lon) + .01,
+                           min(start.lon, end.lon) - .01,
+                           network_type='drive',
+                           truncate_by_edge=True)
+    print('Done')
     # Setup
 
     nodes = get_nodes(G)
@@ -24,6 +34,8 @@ def find_shortest_path_a_star(G, start_coords: Coordinates, end_coords: Coordina
     result_node = None
 
     # A*
+
+    print("Looking for the shortest path...")
 
     open_list = np.array([start_node], dtype=object)
 
@@ -46,18 +58,17 @@ def find_shortest_path_a_star(G, start_coords: Coordinates, end_coords: Coordina
                 node.previous_node = cheapest_node
                 open_list = np.append(open_list, node)
     shortest_route = recreate_route(result_node)
-    return shortest_route
+    print("Done")
+    return G, shortest_route
 
 
 if __name__ == "__main__":
     ox.settings.use_cache = True
 
-    G = ox.load_graphml('./data/sonora.graphml')
+    start = Coordinates(47.6410128490741, 6.840331318378322)
+    end = Coordinates(47.622006728330945, 6.862548058433361)
 
-    start = Coordinates(30.57860, -100.64240)
-    end = Coordinates(30.57283, -100.62984)
-
-    draw_graph(G)
-    route = find_shortest_path_a_star(G, start, end)
+    graph, route = find_shortest_path_a_star(start, end)
+    draw_graph(graph)
     draw_route(route)
     plt.show()

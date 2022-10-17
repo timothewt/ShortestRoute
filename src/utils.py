@@ -49,7 +49,7 @@ def find_connected_nodes(node_id: int, nodes, edges):
     """
     connected_nodes = set()
     for edge in edges:
-        if edge.node_1_id == node_id or edge.node_2_id == node_id:
+        if (edge.node_1_id == node_id or edge.node_2_id == node_id) and not (edge.node_1_id == edge.node_2_id):  # xor
             new_node_id = [id for id in [edge.node_1_id, edge.node_2_id] if id != node_id][0]
             new_node = [node for node in nodes if node.id == new_node_id][0]
             new_node.distance_from_previous_node = edge.length
