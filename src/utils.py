@@ -1,11 +1,12 @@
 import haversine as hs
 import numpy as np
 import osmnx as ox
+import networkx
 from matplotlib import pyplot as plt
 from graph_elements import *
 
 
-def get_nodes(graph):
+def get_nodes(graph: networkx.MultiDiGraph) -> np.ndarray([], dtype=Node):
     """
     Gets all the nodes of a graph in an array
     :param graph: OSMNX graph from which we extract the nodes
@@ -17,7 +18,7 @@ def get_nodes(graph):
     return nodes
 
 
-def get_edges(graph):
+def get_edges(graph: networkx.MultiDiGraph) -> np.ndarray([], dtype=Edge):
     """
     Gets all the edges of a graph in an array
     :param graph: OSMNX graph from which we extract the edges
@@ -29,18 +30,18 @@ def get_edges(graph):
     return edges
 
 
-def add_h_to_nodes(nodes, end_coordinates):
+def add_h_to_nodes(nodes: np.ndarray, end_node: Node) -> None:
     """
     Adds the geo-distance between the nodes and the goal point
     :param nodes: array of Node objects, all the nodes in the graph
-    :param end_coordinates: Coordinates object
+    :param end_node: Coordinates object
     """
     for node in nodes:
-        node.h = get_geo_distance(node.coordinates, end_coordinates)
+        node.h = get_geo_distance(node.coordinates, end_node.coordinates)
         node.f = node.h
 
 
-def find_connected_nodes(node_id: int, nodes, edges):
+def find_connected_nodes(node_id: int, nodes: np.ndarray([], dtype=Node), edges: np.ndarray([], dtype=Edge)) -> np.ndarray([], dtype=Node):
     """
     Gives all the nodes connected to the node of id 'node_id' by a single edge, and not being oneway towards the node
     :param node_id: int, node id from which we search the connected nodes
@@ -63,7 +64,7 @@ def find_connected_nodes(node_id: int, nodes, edges):
     return connected_nodes
 
 
-def find_nearest_node(coordinates: Coordinates, nodes: np.ndarray) -> Node:
+def find_nearest_node(coordinates: Coordinates, nodes: np.ndarray([], dtype=Node)) -> Node:
     """
     Finds the node of the graph the closest to the coordinates given
     :param coordinates: Coordinate object, from which we want to find the closest node
@@ -90,7 +91,7 @@ def get_geo_distance(current: Coordinates, goal: Coordinates) -> float:
     return hs.haversine((current.lat, current.lon), (goal.lat, goal.lon), unit=hs.Unit.METERS)
 
 
-def get_cheapest_node(nodes) -> Node:
+def get_cheapest_node(nodes: np.ndarray([], dtype=Node)) -> Node:
     """
     Gets the cheapest node of an array of node, considering their f value
     :param nodes: array of Node objects
@@ -99,7 +100,7 @@ def get_cheapest_node(nodes) -> Node:
     return min(nodes, key=lambda node: node.f)
 
 
-def recreate_route(final_node):
+def recreate_route(final_node: Node) -> np.ndarray([], dtype=Node):
     """
     Recreates the route took by the algorithm
     :param final_node: Node object, final node of the route
@@ -113,17 +114,15 @@ def recreate_route(final_node):
     return route
 
 
-def draw_graph(G):
+def draw_graph(G: networkx.MultiDiGraph) -> None:
     """
     Draws the graph with all the nodes and edges as a matplotlib plt
     :param G: OSMNX Graph to draw
-    :return the elements of the plot
     """
-    fig, ax = ox.plot_graph(G, show=False, close=False)
-    return fig, ax
+    ox.plot_graph(G, show=False, close=False)
 
 
-def draw_edge(node1: Node, node2: Node, color="r"):
+def draw_edge(node1: Node, node2: Node, color: str = "r") -> None:
     """
     Draws an edge of the graph plot as a straight line
     :param node1: Node object
@@ -134,7 +133,7 @@ def draw_edge(node1: Node, node2: Node, color="r"):
              (node1.coordinates.lat, node2.coordinates.lat), c=color)
 
 
-def draw_node(node: Node, color='r'):
+def draw_node(node: Node, color: str = 'r') -> None:
     """
     Draws a node on the graph plot as a dot
     :param node: Node object we want to draw
@@ -143,7 +142,7 @@ def draw_node(node: Node, color='r'):
     plt.plot(node.coordinates.lon, node.coordinates.lat, c=color, marker="o")
 
 
-def draw_route(route: Route, color='r'):
+def draw_route(route: Route, color: str = 'r') -> None:
     """
     Draws a route on the graph plot
     :param route: Route object, containing all the nodes visited

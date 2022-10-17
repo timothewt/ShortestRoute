@@ -11,11 +11,12 @@ class Coordinates:
         lon: float
             Longitude
     """
-    def __init__(self, lat: float, lon: float):
+
+    def __init__(self, lat: float, lon: float) -> None:
         self.lat = lat
         self.lon = lon
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"(Lat: {self.lat}, Lon: {self.lon})"
 
 
@@ -41,7 +42,8 @@ class Node:
         f: float
             f = g + h, evaluate the cost of the route from this node to the goal node
     """
-    def __init__(self, id: int, lat: float, lon: float):
+
+    def __init__(self, id: int, lat: float, lon: float) -> None:
         self.id = id
         self.coordinates = Coordinates(lat, lon)
         self.has_been_visited = False
@@ -73,7 +75,8 @@ class Edge:
         length: float
             Length of the edge
     """
-    def __init__(self, node_1_id: int, node_2_id: int, is_oneway: bool, length: float):
+
+    def __init__(self, node_1_id: int, node_2_id: int, is_oneway: bool, length: float) -> None:
         self.node_1_id = node_1_id
         self.node_2_id = node_2_id
         self.is_oneway = is_oneway
@@ -97,7 +100,8 @@ class Route:
         distance_travelled: float
             Total distance travelled during the route
     """
-    def __init__(self, final_node=None, distance_travelled=0.0):
+
+    def __init__(self, final_node: Node = None, distance_travelled: float = 0.0) -> None:
         self.nodes_visited = np.empty((0, 1), dtype=object)
         if final_node:
             self.add_node(final_node)
@@ -111,7 +115,7 @@ class Route:
                f"Nodes visited: {nodes_visited_by_id}\n" \
                f"Length: {self.distance_travelled}\n"
 
-    def add_node(self, node: Node):
+    def add_node(self, node: Node) -> None:
         """
         Adds a node to the route
         :param node: Node object

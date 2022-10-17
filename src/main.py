@@ -1,4 +1,3 @@
-import networkx
 from utils import *
 from graph_elements import *
 
@@ -31,7 +30,7 @@ def find_shortest_path_a_star(start_coords: Coordinates, end_coords: Coordinates
     end_node = find_nearest_node(end_coords, nodes)
     start_node.h = get_geo_distance(start_node.coordinates, end_node.coordinates)
     start_node.f = start_node.g + start_node.h
-    add_h_to_nodes(nodes, end_node.coordinates)
+    add_h_to_nodes(nodes, end_node)
     result_node = None
 
     # A*
