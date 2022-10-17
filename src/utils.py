@@ -41,7 +41,7 @@ def add_h_to_nodes(nodes: np.ndarray, end_node: Node) -> None:
         node.f = node.h
 
 
-def find_connected_nodes(node_id: int, nodes: np.ndarray([], dtype=Node), edges: np.ndarray([], dtype=Edge)) -> np.ndarray([], dtype=Node):
+def find_connected_nodes(node_id: int, nodes: np.ndarray([], dtype=Node), edges: np.ndarray([], dtype=Edge)) -> set[Node]:
     """
     Gives all the nodes connected to the node of id 'node_id' by a single edge, and not being oneway towards the node
     :param node_id: int, node id from which we search the connected nodes
