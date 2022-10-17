@@ -14,6 +14,7 @@ def find_shortest_path_a_star(start_coords: Coordinates, end_coords: Coordinates
     # Fetching the graph with OSMNX
 
     print('Downloading graph data...')
+
     G = ox.graph_from_bbox(min(start.lat, end.lat) - .01,
                            max(start.lat, end.lat) + .01,
                            max(start.lon, end.lon) + .01,
@@ -58,17 +59,20 @@ def find_shortest_path_a_star(start_coords: Coordinates, end_coords: Coordinates
                 node.previous_node = cheapest_node
                 open_list = np.append(open_list, node)
     shortest_route = recreate_route(result_node)
+
     print("Done")
+
     return G, shortest_route
 
 
 if __name__ == "__main__":
-    ox.settings.use_cache = True
-
+    
     start = Coordinates(47.6410128490741, 6.840331318378322)
     end = Coordinates(47.622006728330945, 6.862548058433361)
 
     graph, route = find_shortest_path_a_star(start, end)
     draw_graph(graph)
     draw_route(route)
+    draw_node(Node(0, start.lat, start.lon), color="g")
+    draw_node(Node(0, end.lat, end.lon), color="b")
     plt.show()

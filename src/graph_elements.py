@@ -68,18 +68,22 @@ class Edge:
             First node connected by the edge
         node_2_id: Node object
             Second node connected by the edge
+        is_oneway: bool
+            Indicates if the edge can only be taken from node_1 to node_2 but not from node_2 to node_1
         length: float
             Length of the edge
     """
-    def __init__(self, node_1_id: int, node_2_id: int, length: float):
+    def __init__(self, node_1_id: int, node_2_id: int, is_oneway: bool, length: float):
         self.node_1_id = node_1_id
         self.node_2_id = node_2_id
+        self.is_oneway = is_oneway
         self.length = length
 
     def __str__(self) -> str:
         return f"-----Edge-----\n" \
                f"Node 1: {self.node_1_id}\n" \
                f"Node 2: {self.node_2_id}\n" \
+               f"Oneway: {self.is_oneway}\n" \
                f"Length: {self.length}\n"
 
 

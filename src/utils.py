@@ -1,4 +1,5 @@
 import haversine as hs
+import numpy as np
 import osmnx as ox
 from matplotlib import pyplot as plt
 from graph_elements import *
@@ -24,7 +25,7 @@ def get_edges(graph):
     """
     edges = np.array([], dtype=object)
     for edge in graph.out_edges(data=True):
-        edges = np.append(edges, Edge(edge[0], edge[1], edge[2]['length']))
+        edges = np.append(edges, Edge(edge[0], edge[1], edge[2]['length'], edge[2]['oneway']))
     return edges
 
 
@@ -41,7 +42,7 @@ def add_h_to_nodes(nodes, end_coordinates):
 
 def find_connected_nodes(node_id: int, nodes, edges):
     """
-    Gives all the nodes connected to the node of id 'node_id' by a single edge
+    Gives all the nodes connected to the node of id 'node_id' by a single edge, and not being oneway towards the node
     :param node_id: int, node id from which we search the connected nodes
     :param edges: array of Edge objects, all the edges of the graph
     :param nodes: array of Node objects, all the nodes in the graph
@@ -49,15 +50,20 @@ def find_connected_nodes(node_id: int, nodes, edges):
     """
     connected_nodes = set()
     for edge in edges:
-        if (edge.node_1_id == node_id or edge.node_2_id == node_id) and not (edge.node_1_id == edge.node_2_id):  # xor
-            new_node_id = [id for id in [edge.node_1_id, edge.node_2_id] if id != node_id][0]
-            new_node = [node for node in nodes if node.id == new_node_id][0]
-            new_node.distance_from_previous_node = edge.length
-            connected_nodes.add(new_node)
+        if not (edge.node_1_id == edge.node_2_id):
+            if edge.node_1_id == node_id:  # if the first node of the edge is the current node, a oneway isn't a problem
+                new_node = [node for node in nodes if node.id == edge.node_2_id][0]
+                new_node.distance_from_previous_node = edge.length
+                connected_nodes.add(new_node)
+            elif edge.node_2_id == node_id:
+                if not edge.is_oneway:  # if it's the second one we have to make sure it's not oneway
+                    new_node = [node for node in nodes if node.id == edge.node_1_id][0]
+                    new_node.distance_from_previous_node = edge.length
+                    connected_nodes.add(new_node)
     return connected_nodes
 
 
-def find_nearest_node(coordinates, nodes) -> Node:
+def find_nearest_node(coordinates: Coordinates, nodes: np.ndarray) -> Node:
     """
     Finds the node of the graph the closest to the coordinates given
     :param coordinates: Coordinate object, from which we want to find the closest node
@@ -65,11 +71,11 @@ def find_nearest_node(coordinates, nodes) -> Node:
     :return: a Node object, the closest to the coordinates
     """
     nearest_node = Node(0, 0, 0)
-    minimum = 100000000000000
+    minimum = 99999999999999
     for node in nodes:
-        diff = pow(abs(coordinates.lat - node.coordinates.lat), 2) + pow(abs(coordinates.lon - node.coordinates.lon), 2)
-        if diff < minimum:
-            minimum = diff
+        distance = get_geo_distance(coordinates, node.coordinates)
+        if distance < minimum:
+            minimum = distance
             nearest_node = node
     return nearest_node
 
@@ -101,7 +107,7 @@ def recreate_route(final_node):
     """
     route = Route()
     current_node = final_node
-    while current_node.previous_node:
+    while current_node:
         route.add_node(current_node)
         current_node = current_node.previous_node
     return route
