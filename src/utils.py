@@ -6,6 +6,24 @@ from matplotlib import pyplot as plt
 from graph_elements import *
 
 
+def load_graph_from_coordinates(start: Coordinates, end: Coordinates) -> networkx.MultiDiGraph:
+    """
+    Loads a geographical place between two coordinates as a graph
+    :param start: starting coordinates of the route
+    :param end: ending coordinates of the route
+    :return: the graph containing all the intersections as nodes and roads as edges
+    """
+    G = ox.graph_from_bbox(min(start.lat, end.lat) - .01,
+                           max(start.lat, end.lat) + .01,
+                           max(start.lon, end.lon) + .01,
+                           min(start.lon, end.lon) - .01,
+                           network_type='drive',
+                           truncate_by_edge=True)
+    G = ox.add_edge_speeds(G)
+    G = ox.add_edge_travel_times(G)
+    return G
+
+
 def get_nodes(graph: networkx.MultiDiGraph) -> np.ndarray([], dtype=Node):
     """
     Gets all the nodes of a graph in an array
@@ -26,39 +44,43 @@ def get_edges(graph: networkx.MultiDiGraph) -> np.ndarray([], dtype=Edge):
     """
     edges = np.array([], dtype=object)
     for edge in graph.out_edges(data=True):
-        edges = np.append(edges, Edge(edge[0], edge[1], edge[2]['length'], edge[2]['oneway']))
+        edges = np.append(edges, Edge(edge[0], edge[1], edge[2]['oneway'], edge[2]['length'], edge[2]['travel_time']))
     return edges
 
 
 def add_h_to_nodes(nodes: np.ndarray, end_node: Node) -> None:
     """
-    Adds the geo-distance between the nodes and the goal point
+    Adds the travel_time at an average speed between the nodes and the goal point
     :param nodes: array of Node objects, all the nodes in the graph
     :param end_node: Coordinates object
     """
+    avg_speed_limit_kmph = 40
+    avg_speed_limit_mps = ((avg_speed_limit_kmph * 1000) / 3600)
     for node in nodes:
-        node.h = get_geo_distance(node.coordinates, end_node.coordinates)
+        node.h = get_geo_distance(node.coordinates, end_node.coordinates) / avg_speed_limit_mps
         node.f = node.h
 
 
-def find_connected_nodes(node_id: int, nodes: np.ndarray([], dtype=Node), edges: np.ndarray([], dtype=Edge)) -> set[Node]:
+def find_connected_nodes(node: Node, nodes: np.ndarray([], dtype=Node), edges: np.ndarray([], dtype=Edge)) -> set[Node]:
     """
-    Gives all the nodes connected to the node of id 'node_id' by a single edge, and not being oneway towards the node
-    :param node_id: int, node id from which we search the connected nodes
+    Gives all the nodes connected to the node by a single edge, and not being oneway towards the node
+    :param node: int, node id from which we search the connected nodes
     :param edges: array of Edge objects, all the edges of the graph
     :param nodes: array of Node objects, all the nodes in the graph
-    :return: a set of Node objects, which are all the nodes connected to the node of id 'node_id'
+    :return: a set of Node objects, which are all the nodes connected to the node
     """
     connected_nodes = set()
     for edge in edges:
         if not (edge.node_1_id == edge.node_2_id):
-            if edge.node_1_id == node_id:  # if the first node of the edge is the current node, a oneway isn't a problem
+            if edge.node_1_id == node.id:  # if the first node of the edge is the current node, a oneway isn't a problem
                 new_node = [node for node in nodes if node.id == edge.node_2_id][0]
+                new_node.time_from_previous_node = edge.travel_time
                 new_node.distance_from_previous_node = edge.length
                 connected_nodes.add(new_node)
-            elif edge.node_2_id == node_id:
+            elif edge.node_2_id == node.id:
                 if not edge.is_oneway:  # if it's the second one we have to make sure it's not oneway
                     new_node = [node for node in nodes if node.id == edge.node_1_id][0]
+                    new_node.time_from_previous_node = edge.travel_time
                     new_node.distance_from_previous_node = edge.length
                     connected_nodes.add(new_node)
     return connected_nodes

@@ -31,8 +31,10 @@ class Node:
             Geographical coordinates of the node
         has_been_visited: boolean
             Indicates if the node has been visited when looking for a route
-        previous_node: float
+        distance_from_previous_node: float
             Distance from the previous node in the route
+        time_from_previous_node: float
+            Travel time from the previous node in the route
         previous_node: Node object
             Previous node of the route using this node
         h: float
@@ -48,6 +50,7 @@ class Node:
         self.coordinates = Coordinates(lat, lon)
         self.has_been_visited = False
         self.distance_from_previous_node = 0.0
+        self.time_from_previous_node = 0.0
         self.previous_node = None
         self.h = 0.0
         self.g = 0.0
@@ -74,13 +77,16 @@ class Edge:
             Indicates if the edge can only be taken from node_1 to node_2 but not from node_2 to node_1
         length: float
             Length of the edge
+        travel_time: float
+            Time taken to go through the edge going at the maximum speed limit
     """
 
-    def __init__(self, node_1_id: int, node_2_id: int, is_oneway: bool, length: float) -> None:
+    def __init__(self, node_1_id: int, node_2_id: int, is_oneway: bool, length: float, travel_time: float) -> None:
         self.node_1_id = node_1_id
         self.node_2_id = node_2_id
         self.is_oneway = is_oneway
         self.length = length
+        self.travel_time = travel_time
 
     def __str__(self) -> str:
         return f"-----Edge-----\n" \
@@ -99,13 +105,16 @@ class Route:
             Nodes visited that constitute the route
         distance_travelled: float
             Total distance travelled during the route
+        total_travel_time: float
+            Total travel time of the Route
     """
 
-    def __init__(self, final_node: Node = None, distance_travelled: float = 0.0) -> None:
+    def __init__(self, final_node: Node = None, distance_travelled: float = 0.0, total_travel_time: float = 0.0) -> None:
         self.nodes_visited = np.empty((0, 1), dtype=object)
         if final_node:
             self.add_node(final_node)
         self.distance_travelled = distance_travelled
+        self.total_travel_time = total_travel_time
 
     def __str__(self) -> str:
         nodes_visited_by_id = []
@@ -113,7 +122,8 @@ class Route:
             nodes_visited_by_id.append(node.id)
         return f"-----Route-----\n" \
                f"Nodes visited: {nodes_visited_by_id}\n" \
-               f"Length: {self.distance_travelled}\n"
+               f"Length: {round(self.distance_travelled, 2)}m\n" \
+               f"Travel time: {round(self.total_travel_time / 60, 2)} minutes\n"
 
     def add_node(self, node: Node) -> None:
         """
@@ -121,3 +131,5 @@ class Route:
         :param node: Node object
         """
         self.nodes_visited = np.append(self.nodes_visited, node)
+        self.distance_travelled = self.distance_travelled + node.distance_from_previous_node
+        self.total_travel_time = self.total_travel_time + node.time_from_previous_node
