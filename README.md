@@ -4,6 +4,7 @@ library. <br/>
 It finds the shortest path considering the length and does not take into account speed limits for the moment.
 
 <img width="50%" src="https://i.ibb.co/QJkC4yv/example.png" alt="Shortest route example">
+
 ---
 ## How to use
 Clone this repo and install the requirements with `pip install -r requirements.txt` (if it doesn't work you may need to use winpip and install Fiona then GDAL first).<br/>
