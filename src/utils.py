@@ -1,5 +1,5 @@
-import haversine as hs
 import numpy as np
+import haversine as hs
 import osmnx as ox
 import networkx
 from matplotlib import pyplot as plt
