@@ -1,7 +1,7 @@
 # Shortest Route
 This python app finds the shortest route between two geographical points, using the A* algorithm and the OSMNX
 library. <br/>
-It finds the shortest path considering the length and does not take into account speed limits for the moment.
+It finds the shortest path considering either the length or the travel time.
 
 <img width="50%" src="https://i.ibb.co/QJkC4yv/example.png" alt="Shortest route example">
 
